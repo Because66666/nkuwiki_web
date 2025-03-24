@@ -19,4 +19,4 @@ jobs:
         uses: JamesIves/github-pages-deploy-action@4.1.1
         with:
           branch: gh-pages  # 部署分支
-          folder: nkuwiki_web/src/.vuepress/dist 
+          folder: src/.vuepress/dist 
