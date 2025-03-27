@@ -14,9 +14,9 @@ export default sidebar({
     {
       text: "开发文档",
       icon: "book",
-      prefix: "/docs",
-      link: "/docs",
-      // children: "structure",
+      prefix: "docs/",
+      link: "docs/",
+      children: "structure",
       // prefix: "/develop/docs.html",
       // children: "structure",
     },

@@ -6,7 +6,7 @@ export default navbar([
   {
     text: "开发文档",
     icon: "book",
-    link: "/docs",
+    link: "/docs/",
   },
   "/communicate/",
 
