@@ -5,8 +5,8 @@ export default sidebar({
     "",
     // "portfolio",
     {
-      text: "探索",
-      icon: "lightbulb",
+      text: "目录",
+      icon: "laptop-code",
       prefix: "docx/",
       link: "docx/",
       children: "structure",

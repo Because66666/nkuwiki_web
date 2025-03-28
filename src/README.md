@@ -1,6 +1,6 @@
 ---
 home: true
-icon: home
+icon: house
 title: 主页
 heroImage: /img/home.png
 bgImageStyle:
@@ -48,6 +48,11 @@ highlights:
     icon: list
     details: nkuwiki的目录
     link: ./docx/
+
+  - title: 开发文档
+    icon: code-merge
+    details: 南开Wiki检索增强生成(RAG)接口文档集合，用于开发者了解和使用RAG服务。
+    link: ./docs/
 
   - title: 常用文档
     icon: file-word
