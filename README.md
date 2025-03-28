@@ -5,7 +5,7 @@
 
 # 网页界面：
 https://nku-wiki.github.io/nkuwiki_web/
-
+https://nkuwiki.com
 # 开发备忘录
 html页面不能直接放入，需要转为md格式。保留主要div标签，系统会自动渲染。可选的模板：普通模板和博客模板。<br>
 html引用的css代码可以直接写入md正文中。<br>
