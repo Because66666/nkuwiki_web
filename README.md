@@ -1,5 +1,5 @@
 # VuePress Theme Hope
-[theme-hope.vuejs.press](https://theme-hope.vuejs.press/zh/)  
+构建时候使用的文档：[theme-hope.vuejs.press](https://theme-hope.vuejs.press/zh/)  
 
 特点，使用markdown来构架页面。
 
