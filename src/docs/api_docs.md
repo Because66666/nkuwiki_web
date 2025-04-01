@@ -13,7 +13,6 @@
 
 如，用户接口的完整路径为 `/api/wxapp/users/me`
 
-
 ## 后端响应标准格式：
 ```json
 {
@@ -54,6 +53,21 @@
 }
 ```
 
+### 错误代码说明
+
+| 状态码 | 说明 |
+|--------|------|
+| 200    | 成功 |
+| 400    | 请求参数错误 |
+| 401    | 未授权，需要登录 |
+| 403    | 禁止访问，无权限 |
+| 404    | 资源不存在 |
+| 422    | 请求验证失败 |
+| 429    | 请求过于频繁 |
+| 500    | 服务器内部错误 |
+| 502    | 网关错误 |
+| 503    | 服务不可用 |
+| 504    | 网关超时 |
 
 ## 一、用户接口
 
@@ -1631,433 +1645,113 @@
 }
 ```
 
-## 六、错误代码
+## 六、Agent智能体API
 
-| 状态码 | 说明 |
-|--------|------|
-| 200    | 成功 |
-| 400    | 请求参数错误 |
-| 401    | 未授权，需要登录 |
-| 403    | 禁止访问，无权限 |
-| 404    | 资源不存在 |
-| 422    | 请求验证失败 |
-| 429    | 请求过于频繁 |
-| 500    | 服务器内部错误 |
-| 502    | 网关错误 |
-| 503    | 服务不可用 |
-| 504    | 网关超时 |
-
-## 七、Agent智能体API
-
-### 7.1 与Agent对话
+### 6.1 智能体聊天接口
 
 **接口**：`POST /api/agent/chat`  
-**描述**：与AI智能体进行对话，支持普通对话和流式返回  
-
+**描述**：与智能体进行对话，支持普通文本和流式响应  
 **请求体**：
 
 ```json
 {
-  "query": "南开大学的校训是什么？",
-  "messages": [
-    {"role": "user", "content": "你好"},
-    {"role": "assistant", "content": "你好！我是南开Wiki智能助手，有什么可以帮助你的吗？"}
-  ],
+  "query": "用户提问内容",
+  "openid": "用户唯一标识",
   "stream": false,
   "format": "markdown",
-  "openid": "user_openid",
-  "timeout": 30
+  "bot_tag": "default"
 }
 ```
 
-**参数说明**：
-- `query` - 必填，用户当前的问题，字符串类型
-- `messages` - 可选，对话历史消息列表，按时间顺序排列，数组类型。每条消息包含 `role`（角色，可以是 "user" 或 "assistant"）和 `content`（内容，字符串）
-- `stream` - 可选，是否使用流式返回，布尔类型，默认为 false
-- `format` - 可选，返回格式，支持 "text"、"markdown" 或 "html"，默认为 "markdown"
-- `openid` - 可选，用户标识符，字符串类型，用于跟踪用户会话和记录用户偏好
-- `timeout` - 可选，流式响应超时时间（秒），默认为30秒，范围5-90秒，仅在 `stream=true` 时有效
+**请求参数说明**：
+- `query` - 字符串，必填，用户的提问内容
+- `openid` - 字符串，必填，用户的唯一标识，用于区分不同用户
+- `stream` - 布尔值，可选，默认false，是否使用流式响应(服务器发送事件SSE)
+- `format` - 字符串，可选，默认"markdown"，响应格式，支持"markdown"、"text"、"html"
+- `bot_tag` - 字符串，可选，默认"default"，用于指定使用哪个机器人，配置在config中
 
-**普通响应**（`stream=false`）：
+**非流式响应**：
 
 ```json
 {
   "code": 200,
   "message": "success",
   "data": {
-    "response": "南开大学的校训是"允公允能，日新月异"。这八个字出自《论语》，体现了南开大学追求公能日新的办学理念。",
-    "sources": [
-      {
-        "type": "小程序帖子",
-        "title": "南开大学简介",
-        "content": "南开大学校训为"允公允能，日新月异"，出自《论语》...",
-        "author": "南开百科"
-      }
-    ],
-    "suggested_questions": [
-      "南开大学的校徽有什么含义？",
-      "南开大学是什么时候创立的？",
-      "南开大学的创始人是谁？"
-    ],
-    "format": "markdown"
+    "message": "AI回复的内容",
+    "sources": [],
+    "format": "markdown",
+    "usage": {},
+    "finish_reason": null
   },
   "details": null,
-  "timestamp": "2023-01-01 12:00:00"
+  "timestamp": "2025-03-27 16:47:42"
 }
 ```
 
-**流式响应**（`stream=true`）：
+**流式响应**：
+使用服务器发送事件(SSE)格式，每个事件包含部分回复内容，格式如下：
 
-当 `stream` 参数设置为 `true` 时，服务器将返回 `text/event-stream` 格式的数据流，符合 Server-Sent Events (SSE) 标准。前端需要按照 SSE 标准解析响应。
+```
+data: {"content": "内容片段1"}
 
-**重要说明**：
-1. 历史消息和上下文：系统会自动处理历史消息，融合到当前查询的上下文中。如果提供了 `messages` 参数，系统会考虑这些历史消息作为对话上下文，提供更连贯的回答。
-   - 性能优化：系统最多只会使用最近的3条历史消息，以提高响应速度。如果需要更多上下文，建议在查询中明确提及关键信息。
-2. 流式响应限制：使用流式响应时不会返回知识源和推荐问题，这些信息只在非流式响应中提供。
-3. 超时设置：流式响应默认有30秒的超时设置（可通过timeout参数调整，范围5-90秒），超时后会自动结束流式传输。
-4. 错误处理：如遇到错误，系统会通过流式响应返回错误信息，并以 `data: [DONE]` 结束流。前端应该处理这些错误情况。
-5. 每个数据行的格式都是 `data: 内容`，最后以 `data: [DONE]` 标记流结束。
+data: {"content": "内容片段2"}
 
-**可能的错误代码**：
-- 400：请求参数错误，如缺少必要参数或参数格式错误
-- 401：未授权，需要提供有效的认证
-- 500：服务器内部错误，请稍后重试
-- 503：服务暂时不可用，可能是由于负载过高或维护
+...
 
-**请求示例**：
-```javascript
-// 前端请求示例（JavaScript）
-const fetchChatResponse = async (query, messages = [], stream = false, format = "markdown", timeout = 30) => {
-  try {
-    const response = await fetch('/api/agent/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        messages,
-        stream,
-        format,
-        openid: 'user123', // 用户唯一标识
-        timeout
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    if (stream) {
-      // 处理流式响应
-      return handleStreamResponse(response);
-    } else {
-      // 处理普通JSON响应
-      const data = await response.json();
-      return data.data.response;
-    }
-  } catch (error) {
-    console.error('Error fetching chat response:', error);
-    throw error;
-  }
-};
-
-// 处理流式响应
-const handleStreamResponse = async (response) => {
-  // 设置超时
-  const timeoutPromise = new Promise((_, reject) => {
-    setTimeout(() => reject(new Error('Stream response timeout')), 60000);
-  });
-  
-  try {
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let fullResponse = '';
-    
-    // 创建一个处理流的Promise
-    const streamPromise = new Promise(async (resolve, reject) => {
-      try {
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) {
-            if (buffer.trim()) {
-              // 处理剩余的缓冲区数据
-              const lines = buffer.split('\n\n');
-              for (const line of lines) {
-                if (line.startsWith('data: ') && line.substring(6) !== '[DONE]') {
-                  const data = line.substring(6);
-                  fullResponse += data;
-                  appendToDisplay(data);
-                }
-              }
-            }
-            resolve(fullResponse);
-            break;
-          }
-          
-          buffer += decoder.decode(value, { stream: true });
-          
-          // 处理缓冲区中的数据行
-          const lines = buffer.split('\n\n');
-          buffer = lines.pop() || ''; // 保留最后一个不完整的行
-          
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const data = line.substring(6);
-              if (data === '[DONE]') {
-                // 流结束
-                console.log('流式响应结束');
-                resolve(fullResponse);
-                return;
-              } else if (data.trim()) { // 忽略空数据块
-                // 处理文本片段
-                console.log('收到文本片段:', data);
-                fullResponse += data;
-                // 在界面上追加显示文本片段
-                appendToDisplay(data);
-              }
-            } else if (line.includes('error')) {
-              // 处理错误消息
-              reject(new Error(`Stream error: ${line}`));
-              return;
-            }
-          }
-        }
-      } catch (error) {
-        reject(error);
-      }
-    });
-    
-    // 等待流处理完成或超时
-    return await Promise.race([streamPromise, timeoutPromise]);
-  } catch (error) {
-    console.error('Error handling stream:', error);
-    throw error;
-  }
-};
-
-// 将文本片段添加到显示区域
-const appendToDisplay = (text) => {
-  const displayElement = document.getElementById('response-display');
-  if (displayElement) {
-    // 处理换行符，确保在前端正确显示
-    if (displayElement.innerHTML) {
-      // 如果是Markdown格式，可以考虑使用Markdown渲染库
-      displayElement.innerHTML += text.replace(/\n/g, '<br>');
-    } else {
-      displayElement.innerHTML = text.replace(/\n/g, '<br>');
-    }
-  }
-};
-
-// 更完整的示例：渲染Markdown格式的流式响应
-const renderMarkdownStream = async (query, messages = [], timeout = 30) => {
-  try {
-    // 清空显示区域
-    const displayElement = document.getElementById('response-display');
-    if (displayElement) {
-      displayElement.innerHTML = '';
-    }
-    
-    // 显示加载指示
-    const loadingElement = document.getElementById('loading-indicator');
-    if (loadingElement) {
-      loadingElement.style.display = 'block';
-    }
-    
-    const response = await fetch('/api/agent/chat', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        query,
-        messages,
-        stream: true,
-        format: 'markdown',
-        openid: 'user123',
-        timeout
-      })
-    });
-    
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-    let fullResponse = '';
-    
-    // 用于渲染Markdown的函数，例如使用marked.js库
-    const markdownToHtml = (markdown) => {
-      // 如果使用marked.js，可以这样调用
-      // return marked.parse(markdown);
-      // 这里使用简单的替换作为示例
-      return markdown
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em>$1</em>')
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
-    };
-    
-    // 处理流式数据
-    while (true) {
-      const { value, done } = await reader.read();
-      if (done) {
-        // 处理缓冲区中剩余的数据
-        if (buffer.trim()) {
-          const lines = buffer.split('\n\n');
-          for (const line of lines) {
-            if (line.startsWith('data: ') && line.substring(6) !== '[DONE]') {
-              const data = line.substring(6);
-              fullResponse += data;
-              // 重新渲染整个响应以确保正确的格式化
-              if (displayElement) {
-                displayElement.innerHTML = markdownToHtml(fullResponse);
-              }
-            }
-          }
-        }
-        break;
-      }
-      
-      buffer += decoder.decode(value, { stream: true });
-      
-      // 处理缓冲区中的数据行
-      const lines = buffer.split('\n\n');
-      buffer = lines.pop() || ''; // 保留最后一个不完整的行
-      
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          const data = line.substring(6);
-          if (data === '[DONE]') {
-            // 流结束
-            console.log('流式响应结束');
-            // 最终渲染
-            if (displayElement) {
-              displayElement.innerHTML = markdownToHtml(fullResponse);
-            }
-            // 隐藏加载指示
-            if (loadingElement) {
-              loadingElement.style.display = 'none';
-            }
-            return fullResponse;
-          } else if (data.trim()) {
-            // 处理文本片段
-            fullResponse += data;
-            // 实时渲染更新的响应
-            if (displayElement) {
-              displayElement.innerHTML = markdownToHtml(fullResponse);
-            }
-          }
-        }
-      }
-    }
-    
-    // 隐藏加载指示
-    if (loadingElement) {
-      loadingElement.style.display = 'none';
-    }
-    
-    return fullResponse;
-  } catch (error) {
-    console.error('流式请求错误:', error);
-    // 显示错误消息
-    const displayElement = document.getElementById('response-display');
-    if (displayElement) {
-      displayElement.innerHTML = `<div class="error">${error.message}</div>`;
-    }
-    // 隐藏加载指示
-    const loadingElement = document.getElementById('loading-indicator');
-    if (loadingElement) {
-      loadingElement.style.display = 'none';
-    }
-    throw error;
-  }
-};
-
-// 使用示例
-const chatWithAI = async () => {
-  try {
-    // 普通请求
-    const normalResponse = await fetchChatResponse(
-      '南开大学的校训是什么？',
-      [
-        {role: 'user', content: '你好'},
-        {role: 'assistant', content: '你好！我是南开Wiki智能助手，有什么可以帮助你的吗？'}
-      ],
-      false, // 非流式
-      'markdown'
-    );
-    console.log('普通响应:', normalResponse);
-    
-    // 流式请求
-    const streamResponse = await renderMarkdownStream(
-      '南开大学的校训是什么？',
-      [
-        {role: 'user', content: '你好'},
-        {role: 'assistant', content: '你好！我是南开Wiki智能助手，有什么可以帮助你的吗？'}
-      ],
-      30 // 30秒超时
-    );
-    console.log('完整流式响应:', streamResponse);
-  } catch (error) {
-    console.error('对话错误:', error);
-    // 显示错误消息给用户
-    alert(`请求失败: ${error.message}`);
-  }
-};
+data: {"content": "内容片段n"}
 ```
 
-**响应示例**：
-```
-data: 南开
-data: 大学
-data: 的
-data: 校训
-data: 是
-data: "
-data: 允公
-data: 允能
-data: ，
-data: 日新月异
-data: "
-data: 。
-data: 这
-data: 八个
-data: 字
-data: 出自
-data: 《
-data: 论语
-data: 》
-data: ，
-data: 体现
-data: 了
-data: 南开大学
-data: 追求
-data: 公能
-data: 日新
-data: 的
-data: 办学
-data: 理念
-data: 。
-data: [DONE]
+**响应参数说明**：
+- `message` - 字符串，AI回复的内容
+- `sources` - 数组，知识来源，目前为空数组
+- `format` - 字符串，输出格式
+- `usage` - 对象，token使用情况
+- `finish_reason` - 字符串或null，完成原因
+
+**错误码**：
+- `400` - 请求参数错误
+- `500` - 服务器内部错误
+
+**示例**：
+
+请求：
+```bash
+curl -X POST "http://localhost:8001/api/agent/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "南开大学有什么特色专业", "openid": "test_user", "stream": false, "format": "markdown", "bot_tag": "default"}'
 ```
 
-### 7.2 知识库搜索
+流式请求：
+```bash
+curl -N -X POST "http://localhost:8001/api/agent/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"query": "南开大学有什么特色专业", "openid": "test_user", "stream": true, "format": "markdown", "bot_tag": "default"}'
+```
+
+### 6.2 知识库搜索
 
 **接口**：`POST /api/agent/search`  
-**描述**：搜索知识库内容  
+**描述**：搜索知识库内容，支持跨表搜索和相关度排序，采用优化的相关度算法  
 **请求体**：
 
 ```json
 {
   "keyword": "南开大学历史",
-  "limit": 10
+  "limit": 10,
+  "include_content": false,
+  "tables": ["wxapp_posts", "website_nku", "wechat_nku"]
 }
 ```
+
+**请求参数说明**：
+- `keyword` - 字符串，必填，搜索关键词
+- `limit` - 整数，可选，默认10，最大50，返回结果数量限制
+- `include_content` - 布尔值，可选，默认false，是否包含完整内容
+- `tables` - 字符串数组，可选，要搜索的表名列表，支持以下表：
+  - `wxapp_posts` - 微信小程序帖子表（默认）
+  - `website_nku` - 南开大学网站内容
+  - `wechat_nku` - 南开大学微信公众号内容
+  - `market_nku` - 南开大学校园集市内容
 
 **响应**：
 
@@ -2077,7 +1771,9 @@ data: [DONE]
         "view_count": 1024,
         "like_count": 89,
         "comment_count": 15,
-        "relevance": 0.95
+        "relevance": 0.95,
+        "source": "wxapp_posts",
+        "content": "南开大学创建于1919年，由著名爱国教育家张伯苓先生创办..."  // 仅当include_content=true时包含
       },
       {
         "id": 2,
@@ -2085,11 +1781,12 @@ data: [DONE]
         "content_preview": "2019年，南开大学迎来百年华诞...",
         "author": "南开校友",
         "create_time": "2023-01-02 12:00:00",
-        "type": "文章",
+        "type": "网站",
         "view_count": 986,
         "like_count": 76,
         "comment_count": 12,
-        "relevance": 0.85
+        "relevance": 0.85,
+        "source": "website_nku"
       }
     ],
     "keyword": "南开大学历史",
@@ -2100,7 +1797,121 @@ data: [DONE]
 }
 ```
 
-### 7.3 获取Agent状态
+**响应参数说明**：
+- `results` - 数组，搜索结果列表，按相关度排序
+  - `id` - 整数，记录ID
+  - `title` - 字符串，标题
+  - `content_preview` - 字符串，内容预览，会智能截取关键词上下文
+  - `author` - 字符串，作者/发布者
+  - `create_time` - 字符串，创建/发布时间
+  - `type` - 字符串，内容类型，如"文章"、"网站"、"公众号"等
+  - `view_count` - 整数，浏览次数
+  - `like_count` - 整数，点赞次数
+  - `comment_count` - 整数，评论数量
+  - `relevance` - 浮点数，相关度得分，范围0~1
+  - `source` - 字符串，数据来源表名
+  - `content` - 字符串，完整内容（仅当include_content=true时包含）
+- `keyword` - 字符串，搜索关键词
+- `total` - 整数，结果总数
+
+**相关度计算优化**：
+- 标题匹配优先于内容匹配
+- 完整关键词匹配优先于部分关键词匹配
+- 考虑关键词出现位置，靠前位置有更高权重
+- 考虑关键词出现频率
+- 考虑内容长度因素，中等长度内容有轻微加权
+- 文档已删除状态自动排除
+
+**错误码**：
+- `400` - 请求参数错误（如不支持的表名）
+- `422` - 请求验证失败（如空关键词或超出限制）
+- `500` - 服务器内部错误
+
+**示例**：
+
+请求：
+```bash
+curl -X POST "http://localhost:8001/api/agent/search" \
+  -H "Content-Type: application/json" \
+  -d '{"keyword": "南开大学历史", "limit": 10, "tables": ["wxapp_posts", "website_nku"]}'
+```
+
+包含完整内容的请求：
+```bash
+curl -X POST "http://localhost:8001/api/agent/search" \
+  -H "Content-Type: application/json" \
+  -d '{"keyword": "南开大学历史", "limit": 5, "include_content": true, "tables": ["wxapp_posts"]}'
+```
+
+### 6.3 高级知识库搜索
+
+**接口**：`POST /api/agent/search/advanced`  
+**描述**：高级知识库搜索，支持更多搜索条件和排序方式  
+**请求体**：
+
+```json
+{
+  "keyword": "南开大学",
+  "title": "校史",
+  "content": "张伯苓",
+  "author": "南开百科",
+  "start_time": "2023-01-01T00:00:00",
+  "end_time": "2023-12-31T23:59:59", 
+  "limit": 10,
+  "include_content": false,
+  "tables": ["wxapp_posts", "website_nku"],
+  "sort_by": "time_desc"
+}
+```
+
+**请求参数说明**：
+- `keyword` - 字符串，可选，搜索关键词（标题和内容）
+- `title` - 字符串，可选，标题关键词
+- `content` - 字符串，可选，内容关键词
+- `author` - 字符串，可选，作者关键词
+- `start_time` - 字符串，可选，开始时间（ISO格式）
+- `end_time` - 字符串，可选，结束时间（ISO格式）
+- `limit` - 整数，可选，默认10，最大50，返回结果数量限制
+- `include_content` - 布尔值，可选，默认false，是否包含完整内容
+- `tables` - 字符串数组，可选，要搜索的表名列表，同普通搜索
+- `sort_by` - 字符串，可选，排序方式：
+  - `relevance` - 按相关度排序（默认）
+  - `time_desc` - 按时间降序（最新的在前）
+  - `time_asc` - 按时间升序（最早的在前）
+  - `likes` - 按点赞数排序
+  - `views` - 按浏览量排序
+
+**说明**：
+- 至少需要指定一个搜索条件（keyword, title, content, author中至少一个）
+- 如果同时指定多个条件，它们之间是"与"的关系
+- 当不指定关键词但指定排序方式时，相关度默认为0.5以保证结果有序
+- 响应格式与普通搜索相同，但排序方式可能不同
+
+**响应**：
+与普通知识库搜索接口相同的响应格式
+
+**错误码**：
+- `400` - 请求参数错误（如不支持的表名）
+- `422` - 请求验证失败（如无有效搜索条件或时间范围错误）
+- `500` - 服务器内部错误
+
+**示例**：
+
+按时间降序查询请求：
+```bash
+curl -X POST "http://localhost:8001/api/agent/search/advanced" \
+  -H "Content-Type: application/json" \
+  -d '{"keyword": "南开大学", "limit": 10, "tables": ["wxapp_posts", "website_nku"], "sort_by": "time_desc"}'
+```
+
+多条件查询请求：
+```bash
+curl -X POST "http://localhost:8001/api/agent/search/advanced" \
+  -H "Content-Type: application/json" \
+  -d '{"title": "校史", "author": "南开百科", "start_time": "2023-01-01T00:00:00", "limit": 5, "sort_by": "likes"}'
+```
+
+### 6.4 获取Agent状态
 
 **接口**：`GET /api/agent/status`  
 **描述**：获取Agent系统状态  
@@ -2122,153 +1933,293 @@ data: [DONE]
 }
 ```
 
-// 微信小程序专用实现示例
-// 在小程序中处理流式响应
-function wxChatWithStreamReply(query, messages = [], timeout = 30) {
-  // 页面对象，假设在Page中调用
-  const page = this;
-  
-  // 清空之前的响应内容
-  page.setData({
-    responseText: '',
-    isLoading: true
-  });
-  
-  // 创建请求任务
-  const requestTask = wx.request({
-    url: 'https://nkuwiki.com/api/agent/chat',
-    method: 'POST',
-    data: {
-      query: query,
-      messages: messages,
-      stream: true,
-      format: 'markdown',
-      openid: wx.getStorageSync('openid') || '',
-      timeout: timeout
-    },
-    header: {
-      'content-type': 'application/json'
-    },
-    responseType: 'text', // 使用text类型接收数据流
-    success(res) {
-      // 小程序不支持原生的SSE，所以需要手动处理接收到的数据
-      console.log('请求成功，将通过onChunk处理数据流');
-    },
-    fail(err) {
-      console.error('请求失败', err);
-      page.setData({
-        isLoading: false,
-        error: err.errMsg || '请求失败'
-      });
-    },
-    complete() {
-      console.log('请求完成');
-    }
-  });
+### 智能搜索接口
 
-  // 缓存接收到的数据
-  let buffer = '';
-  let fullResponse = '';
-  
-  // 处理接收到的数据块
-  requestTask.onChunkedResponse((res) => {
-    if (res.statusCode !== 200) {
-      console.error('响应状态码错误:', res.statusCode);
-      page.setData({
-        isLoading: false,
-        error: `响应错误: ${res.statusCode}`
-      });
-      return;
-    }
-    
-    // 将新数据添加到缓冲区
-    buffer += res.data;
-    
-    // 按行处理数据
-    while (buffer.includes('\n\n')) {
-      const index = buffer.indexOf('\n\n');
-      const line = buffer.substring(0, index);
-      buffer = buffer.substring(index + 2);
-      
-      if (line.startsWith('data: ')) {
-        const data = line.substring(6);
-        if (data === '[DONE]') {
-          // 流结束
-          console.log('流式响应结束');
-          page.setData({
-            isLoading: false
-          });
-        } else if (data.trim()) {
-          // 处理文本片段
-          fullResponse += data;
-          // 更新UI显示
-          page.setData({
-            responseText: fullResponse
-          });
-        }
-      }
-    }
-  });
-  
-  // 处理响应完成
-  requestTask.onChunkedResponseEnd((err) => {
-    if (err) {
-      console.error('数据流接收出错', err);
-      page.setData({
-        isLoading: false,
-        error: err.errMsg || '数据流接收出错'
-      });
-    } else {
-      console.log('数据流接收完成');
-      page.setData({
-        isLoading: false
-      });
-    }
-    
-    // 处理缓冲区中可能残留的数据
-    if (buffer.trim()) {
-      const lines = buffer.split('\n\n');
-      for (const line of lines) {
-        if (line.startsWith('data: ') && line.substring(6) !== '[DONE]') {
-          const data = line.substring(6);
-          fullResponse += data;
-          page.setData({
-            responseText: fullResponse
-          });
-        }
-      }
-    }
-  });
-  
-  // 保存requestTask以便可以中断请求
-  page.streamRequestTask = requestTask;
-  
-  return requestTask;
+`POST /api/search`
+
+**请求参数**：
+```json
+{
+  "keyword": "南开",
+  "page": 1,
+  "page_size": 10,
+  "search_type": "all"
 }
+```
 
-// 在小程序页面中使用
-// Page({
-//   data: {
-//     responseText: '',
-//     isLoading: false,
-//     error: ''
-//   },
-//   
-//   // 发送聊天请求
-//   sendChatRequest: function() {
-//     const query = this.data.inputValue;
-//     const messages = this.data.chatHistory || [];
-//     
-//     wxChatWithStreamReply.call(this, query, messages, 30);
-//   },
-//   
-//   // 取消正在进行的请求
-//   cancelRequest: function() {
-//     if (this.streamRequestTask) {
-//       this.streamRequestTask.abort();
-//       this.setData({
-//         isLoading: false
-//       });
-//     }
-//   }
-// });
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "results": [
+      {
+        "post_id": 123,
+        "title": "南开大学简介",
+        "content": "南开大学是著名学府...",
+        "highlight_title": "南开...",
+        "highlight_content": "...大学是著名学府...",
+        "create_time": "2023-05-01 10:00:00",
+        "author": "张三",
+        "comment_count": 5
+      }
+    ],
+    "total": 15,
+    "current_page": 1
+  }
+}
+```
+
+**参数说明**：
+| 参数名 | 类型 | 必填 | 说明 |
+|--------|------|------|-----|
+| keyword | string | 是 | 搜索关键词，支持布尔模式 |
+| page | int | 否 | 页码，默认1 |
+| page_size | int | 否 | 每页数量（1-50），默认10 |
+| search_type | string | 否 | 搜索类型：all(默认)/post(仅文章)/comment(含评论的文章) |
+
+**搜索建议接口**：
+`GET /api/search/suggest?q=南开`
+
+**响应示例**：
+```json
+{
+  "code": 200,
+  "message": "success",
+  "data": [
+    "南开大学简介",
+    "南开校园生活指南",
+    "南开校史"
+  ]
+}
+```
+
+**高级功能**：
+1. 支持高亮显示匹配片段（highlight_title/highlight_content）
+2. 支持多表联合搜索（wxapp_posts, website_nku等）
+3. 支持按时间范围、作者、分类等过滤
+4. 搜索结果自动分页，支持相关度/时间排序
+
+## 七、数据库MCP接口
+
+### 7.1 获取MCP清单
+
+**接口**：`GET /api/mcp`  
+**描述**：获取MCP（Model Context Protocol）清单，使用SSE格式返回工具列表  
+**返回**：Server-Sent Events (SSE) 流式响应，内容包括：
+
+1. 服务器信息事件
+```
+event: server_info
+data: {
+  "name": "nkuwiki-db-mcp",
+  "version": "1.0.0",
+  "capabilities": {
+    "methods": ["execute_sql", "show_tables", "describe_table", "query_table"],
+    "streaming": true,
+    "tools": true
+  },
+  "status": "ready",
+  "protocol_version": "2023-07-01"
+}
+```
+
+2. 会话创建事件
+```
+event: session_created
+data: {"session_id": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"}
+```
+
+3. 工具清单事件
+```
+event: manifest
+data: {
+  "type": "manifest",
+  "tools": [
+    {
+      "name": "execute_sql",
+      "description": "执行SQL查询并返回结果，仅支持SELECT语句",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "sql": {
+            "type": "string",
+            "description": "SQL查询语句(仅SELECT)"
+          },
+          "params": {
+            "type": "array",
+            "description": "查询参数列表",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": ["sql"]
+      }
+    },
+    {
+      "name": "show_tables",
+      "description": "显示数据库中所有表",
+      "parameters": {
+        "type": "object",
+        "properties": {}
+      }
+    },
+    {
+      "name": "describe_table",
+      "description": "显示表结构",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "table_name": {
+            "type": "string",
+            "description": "表名"
+          }
+        },
+        "required": ["table_name"]
+      }
+    },
+    {
+      "name": "query_table",
+      "description": "查询指定表的数据",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "table_name": {
+            "type": "string",
+            "description": "表名"
+          },
+          "conditions": {
+            "type": "object",
+            "description": "查询条件，字段名和值的映射"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "返回结果数量限制，默认20"
+          },
+          "offset": {
+            "type": "integer",
+            "description": "分页偏移量，默认0"
+          },
+          "order_by": {
+            "type": "string",
+            "description": "排序方式，例如'id DESC'"
+          }
+        },
+        "required": ["table_name"]
+      }
+    }
+  ]
+}
+```
+
+4. 心跳事件（每15秒发送一次）
+```
+event: heartbeat
+data: {"timestamp": 1717027452.123456}
+```
+
+### 7.2 执行JSON-RPC调用
+
+**接口**：`POST /api/mcp/jsonrpc`  
+**描述**：通过JSON-RPC调用MCP工具，提供标准JSON-RPC 2.0接口  
+**请求体**：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "request-id-123",
+  "method": "execute_sql",
+  "params": {
+    "sql": "SELECT * FROM wxapp_posts LIMIT 5",
+    "params": []
+  }
+}
+```
+
+**响应**：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "request-id-123",
+  "result": {
+    "result": [
+      {"id": 1, "title": "帖子标题", "content": "帖子内容", "...": "..."},
+      {"id": 2, "title": "帖子标题2", "content": "帖子内容2", "...": "..."}
+    ],
+    "row_count": 2,
+    "sql": "SELECT * FROM wxapp_posts LIMIT 5"
+  }
+}
+```
+
+**错误响应**：
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": "request-id-123",
+  "error": {
+    "code": -32600,
+    "message": "安全限制：只允许SELECT查询"
+  }
+}
+```
+
+**错误码**：
+- `-32700` - 无效的JSON请求
+- `-32600` - 参数验证错误
+- `-32601` - 未知方法
+- `-32602` - 非法参数
+- `-32603` - 内部错误
+
+**支持的JSON-RPC方法**：
+- `listOfferings` - 返回可用工具列表
+- `execute_sql` - 执行SQL查询（仅SELECT）
+- `show_tables` - 显示所有表
+- `describe_table` - 显示表结构
+- `query_table` - 查询表数据
+
+### 7.3 工具调用接口
+
+**接口**：`POST /api/mcp/tool`  
+**描述**：调用MCP工具（旧版接口，保留兼容性）  
+**请求体**：
+
+```json
+{
+  "tool": "execute_sql",
+  "parameters": {
+    "sql": "SELECT * FROM wxapp_posts LIMIT 5",
+    "params": []
+  }
+}
+```
+
+**响应**：
+
+```json
+{
+  "result": [
+    {"id": 1, "title": "帖子标题", "content": "帖子内容", "...": "..."},
+    {"id": 2, "title": "帖子标题2", "content": "帖子内容2", "...": "..."}
+  ],
+  "row_count": 2
+}
+```
+
+**错误响应**：
+
+```json
+{
+  "error": "安全限制：只允许SELECT查询"
+}
+```
+
+**支持的工具**：
+- `execute_sql` - 执行SQL查询
+- `show_tables` - 显示所有表
+- `describe_table` - 显示表结构
+- `query_table` - 查询表数据
