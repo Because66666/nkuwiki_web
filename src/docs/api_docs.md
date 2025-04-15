@@ -83,21 +83,24 @@
 
 ```json
 {
-  "openid": "微信用户唯一标识", // 必填
-  "unionid": "微信开放平台唯一标识（可选）", // 不会被保存
-  "nick_name": "用户昵称（可选）", // 不会被保存
-  "avatar": "头像URL（可选）", // 不会被保存
-  "gender": 0, // 不会被保存
-  "bio": "个人简介（可选）", // 不会被保存
-  "country": "国家（可选）", // 不会被保存
-  "province": "省份（可选）", // 不会被保存
-  "city": "城市（可选）", // 不会被保存
-  "language": "语言（可选）", // 不会被保存
-  "birthday": "2004-06-28（可选）", // 不会被保存
-  "wechatId": "微信号（可选）", // 不会被保存
-  "qqId": "QQ号（可选）", // 不会被保存
-  "platform": "wxapp", // 不会被保存
-  "extra": {} // 不会被保存
+  "openid": "微信用户唯一标识",         // 必填，微信小程序用户唯一标识
+  "unionid": "微信开放平台唯一标识",    // 可选，微信开放平台唯一标识
+  "nickname": "用户昵称",             // 可选，用户昵称（如不提供则自动生成默认昵称）
+  "avatar": "头像URL",                // 可选，头像URL（若为空则使用默认头像）
+  "gender": 1,                        // 可选，性别：0-未知, 1-男, 2-女
+  "bio": "个人简介",                   // 可选，个人简介
+  "country": "国家",                   // 可选，国家
+  "province": "省份",                  // 可选，省份
+  "city": "城市",                      // 可选，城市
+  "language": "语言",                  // 可选，语言
+  "birthday": "2004-06-28",           // 可选，生日
+  "wechatId": "微信号",                // 可选，微信号
+  "qqId": "QQ号",                      // 可选，QQ号
+  "phone": "手机号",                   // 可选，手机号
+  "university": "大学",                // 可选，大学
+  "extra": {                          // 可选，扩展字段
+    "school": "南开大学"
+  }
 }
 ```
 
@@ -110,24 +113,26 @@
   "data": {
     "id": 10001,
     "openid": "微信用户唯一标识",
-    "unionid": null,
-    "nick_name": null,
-    "avatar": null,
-    "gender": 0,
-    "bio": null,
-    "country": null,
-    "province": null,
-    "city": null,
-    "language": null,
-    "birthday": null,
-    "wechatId": null,
-    "qqId": null,
-    "token_count": 0,
-    "likes_count": 0,
-    "favorites_count": 0,
-    "posts_count": 0,
-    "followers_count": 0,
-    "following_count": 0,
+    "unionid": "微信开放平台唯一标识",
+    "nickname": "用户昵称",
+    "avatar": "头像URL（如果为空，会自动设置为默认头像）",
+    "gender": 1,
+    "bio": "个人简介",
+    "country": "国家",
+    "province": "省份",
+    "city": "城市",
+    "language": "语言",
+    "birthday": "2004-06-28",
+    "wechatId": "微信号",
+    "qqId": "QQ号",
+    "phone": "手机号",
+    "university": "大学",
+    "token_count": 100,
+    "like_count": 10,
+    "favorite_count": 5,
+    "post_count": 8,
+    "follower_count": 20,
+    "follow_count": 15,
     "create_time": "2023-01-01 12:00:00",
     "update_time": "2023-01-01 12:00:00",
     "last_login": "2023-01-01 12:00:00",
@@ -161,14 +166,16 @@
     "nick_name": "用户昵称",
     "avatar": "头像URL",
     "gender": 0,
-    "bio": "个人简介",
-    "country": "国家",
-    "province": "省份",
-    "city": "城市",
-    "language": "语言",
-    "birthday": "2004-06-28",
-    "wechatId": "微信号",
-    "qqId": "QQ号",
+    "bio": null,
+    "country": null,
+    "province": null,
+    "city": null,
+    "language": null,
+    "birthday": null,
+    "wechatId": null,
+    "qqId": null,
+    "phone": null,
+    "university": null,
     "token_count": 0,
     "likes_count": 0,
     "favorites_count": 0,
@@ -216,6 +223,8 @@
     "birthday": "2004-06-28",
     "wechatId": "微信号",
     "qqId": "QQ号",
+    "phone": "手机号",
+    "university": "大学",
     "token_count": 0,
     "likes_count": 0,
     "favorites_count": 0,
@@ -249,38 +258,40 @@
 {
   "code": 200,
   "message": "success",
-  "data": {
-    "users": [
-      {
-        "id": 1,
-        "openid": "微信用户唯一标识",
-        "unionid": "微信开放平台唯一标识",
-        "nick_name": "用户昵称",
-        "avatar": "头像URL",
-        "gender": 0,
-        "bio": "个人简介",
-        "country": "国家",
-        "province": "省份",
-        "city": "城市",
-        "language": "语言",
-        "birthday": "2004-06-28",
-        "wechatId": "微信号",
-        "qqId": "QQ号",
-        "token_count": 0,
-        "likes_count": 0,
-        "favorites_count": 0,
-        "posts_count": 0,
-        "followers_count": 0,
-        "following_count": 0,
-        "create_time": "2023-01-01 12:00:00",
-        "update_time": "2023-01-01 12:00:00",
-        "last_login": "2023-01-01 12:00:00",
-        "platform": "wxapp",
-        "status": 1,
-        "is_deleted": 0,
-        "extra": {}
-      }
-    ],
+  "data": [
+    {
+      "id": 1,
+      "openid": "微信用户唯一标识",
+      "unionid": "微信开放平台唯一标识",
+      "nickname": "用户昵称",
+      "avatar": "头像URL",
+      "gender": 0,
+      "bio": "个人简介",
+      "country": "国家",
+      "province": "省份",
+      "city": "城市",
+      "language": "语言",
+      "birthday": "2004-06-28",
+      "wechatId": "微信号",
+      "qqId": "QQ号",
+      "phone": "手机号",
+      "university": "大学",
+      "token_count": 0,
+      "like_count": 0,
+      "favorite_count": 0,
+      "post_count": 0,
+      "follower_count": 0,
+      "follow_count": 0,
+      "create_time": "2023-01-01 12:00:00",
+      "update_time": "2023-01-01 12:00:00",
+      "last_login": "2023-01-01 12:00:00",
+      "platform": "wxapp",
+      "status": 1,
+      "is_deleted": 0,
+      "extra": {}
+    }
+  ],
+  "pagination": {
     "total": 100,
     "limit": 10,
     "offset": 0
@@ -312,6 +323,8 @@
   "birthday": "2004-06-28",           // 可选，生日
   "wechatId": "微信号",               // 可选，微信号
   "qqId": "QQ号",                     // 可选，QQ号
+  "phone": "手机号",                  // 可选，手机号
+  "university": "大学",               // 可选，大学
   "status": 1,                        // 可选，用户状态：1-正常, 0-禁用
   "extra": {                          // 可选，扩展字段
     "school": "南开大学",
@@ -341,12 +354,14 @@
     "birthday": "2004-06-28",
     "wechatId": "微信号",
     "qqId": "QQ号",
-    "token_count": 0,
-    "likes_count": 0,
-    "favorites_count": 0,
-    "posts_count": 0,
-    "followers_count": 0,
-    "following_count": 0,
+    "phone": "手机号",
+    "university": "大学",
+    "token_count": 100,
+    "like_count": 10,
+    "favorite_count": 5,
+    "post_count": 8,
+    "follower_count": 20,
+    "follow_count": 15,
     "create_time": "2023-01-01 12:00:00",
     "update_time": "2023-01-01 12:30:00",
     "last_login": "2023-01-01 12:00:00",
@@ -396,18 +411,8 @@
 **响应**：
 
 ```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "status": "success",
-    "following_count": 11,
-    "followers_count": 21,
-    "is_following": true
-  },
-  "details": null,
-  "timestamp": "2023-01-01 12:00:00"
-}
+{"code":200,"message":"success","data":{"success":true,"status":"followed","is_following":true},"details":{"message":"关注成功"},"timestamp":"2025-04-12T21:10:26.320996","pagination":null}
+{"code":200,"message":"success","data":{"success":true,"status":"unfollowed","is_following":false},"details":{"message":"取消关注成功"},"timestamp":"2025-04-12T21:10:01.431815","pagination":null}
 ```
 
 ### 1.8 取消关注用户
@@ -459,7 +464,7 @@
 
 ### 1.10 获取用户关注列表
 
-**接口**：`GET /api/wxapp/users/{openid}/followings`  
+**接口**：`GET /api/wxapp/user/following`  
 **描述**：获取用户关注的所有用户  
 **参数**：
 - `openid` - 路径参数，用户openid
@@ -515,7 +520,7 @@
 
 ### 1.11 获取用户粉丝列表
 
-**接口**：`GET /api/wxapp/users/{openid}/followers`  
+**接口**：`GET /api/wxapp/user/follower`  
 **描述**：获取关注该用户的所有用户  
 **参数**：
 - `openid` - 路径参数，用户openid
@@ -608,15 +613,20 @@
 {
   "title": "帖子标题", // 必填
   "content": "帖子内容", // 必填
-  "images": ["图片URL1", "图片URL2"], // 可选
-  "tags": ["标签1", "标签2"], // 可选
+  "image": ["图片URL1", "图片URL2"], // 可选
+  "tag": ["标签1", "标签2"], // 可选
   "category_id": 1, // 可选，默认为0
   "location": { // 可选
     "latitude": 39.12345,
     "longitude": 116.12345,
     "name": "位置名称",
     "address": "详细地址"
-  }
+  },
+  "phone": "手机号", // 可选
+  "wechatId": "微信号", // 可选
+  "qqId": "QQ号", // 可选
+  "nickname": "用户昵称", // 可选，如不提供则从用户表获取
+  "avatar": "用户头像URL" // 可选，如不提供则从用户表获取
 }
 ```
 
@@ -640,7 +650,10 @@
       "name": "位置名称",
       "address": "详细地址"
     },
-    "nick_name": "用户昵称",
+    "phone": "手机号",
+    "wechatId": "微信号",
+    "qqId": "QQ号",
+    "nickname": "用户昵称",
     "avatar": "用户头像URL",
     "view_count": 0,
     "like_count": 0,
@@ -683,7 +696,10 @@
     "tags": ["标签1", "标签2"],
     "category_id": 1,
     "location": "位置信息",
-    "nick_name": "用户昵称",
+    "phone": "手机号",
+    "wechatId": "微信号",
+    "qqId": "QQ号",
+    "nickname": "用户昵称",
     "avatar": "用户头像URL",
     "view_count": 1,
     "like_count": 0,
@@ -770,18 +786,16 @@
 
 ```json
 {
-  "title": "新标题",
-  "content": "新内容",
-  "images": ["新图片URL1", "新图片URL2"],
-  "tags": ["新标签1", "新标签2"],
-  "category_id": 2,
-  "location": {
-    "latitude": 39.12345,
-    "longitude": 116.12345,
-    "name": "位置名称",
-    "address": "详细地址"
-  },
-  "status": 1
+  "post_id": 1, // 必填，整数类型
+  "openid": "发帖用户openid", // 必填
+  "content": "更新后的内容", // 可选，帖子内容
+  "title": "更新后的标题", // 可选，帖子标题
+  "category_id": 2, // 可选，整数类型，分类ID
+  "image": ["图片URL1","图片URL2"], // 可选，图片URL数组
+  "tag": ["标签1","标签2"], // 可选，标签数组
+  "phone": "手机号", // 可选
+  "wechatId": "微信号", // 可选
+  "qqId": "QQ号" // 可选
 }
 ```
 
@@ -805,7 +819,10 @@
       "name": "位置名称",
       "address": "详细地址"
     },
-    "nick_name": "用户昵称", 
+    "phone": "手机号",
+    "wechatId": "微信号",
+    "qqId": "QQ号",
+    "nickname": "用户昵称", 
     "avatar": "用户头像URL",
     "view_count": 10,
     "like_count": 5,
@@ -860,79 +877,34 @@
 **响应**：
 
 ```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "success": true,
-    "message": "点赞成功",
-    "liked": true,
-    "like_count": 6,
-    "post_id": 1,
-    "action": "like"
-  },
-  "details": null,
-  "timestamp": "2023-01-01 12:00:00"
-}
+{"code":200,"message":"success","data":{"success":true,"status":"liked","like_count":1,"is_liked":true},"details":{"message":"点赞成功"},"timestamp":"2025-04-12T20:56:23.008762","pagination":null}
+{"code":200,"message":"success","data":{"success":true,"status":"unliked","like_count":0,"is_liked":false},"details":{"message":"取消点赞成功"},"timestamp":"2025-04-12T20:56:14.207527","pagination":null}
+
 ```
 
 ### 2.7 收藏帖子
 
-**接口**：`POST /api/wxapp/posts/{post_id}/favorite`  
-**描述**：收藏帖子  
-**说明**：该操作会同时更新帖子作者的favorites_count（当被其他用户收藏时）  
-**参数**：
-- `post_id` - 路径参数，帖子ID
-- `openid` - 查询参数，用户openid
+**接口**：`POST /api/wxapp/post/favorite`  
+**描述**：收藏帖子或取消收藏（如果已收藏）  
+**请求体**：
+
+```json
+{
+  "post_id": 1, // 必填，整数类型
+  "openid": "收藏用户的openid" // 必填
+}
+```
 
 **响应**：
 
 ```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "success": true,
-    "message": "收藏成功",
-    "favorite": true,
-    "favorite_count": 3,
-    "post_id": 1,
-    "action": "favorite"
-  },
-  "details": null,
-  "timestamp": "2023-01-01 12:00:00"
-}
+{"code":200,"message":"success","data":{"success":true,"status":"favorited","favorite_count":1,"is_favorited":true},"details":{"message":"收藏成功"},"timestamp":"2025-04-12T20:54:08.462333","pagination":null}
 ```
-
-### 2.8 取消点赞帖子
-
-**接口**：`POST /api/wxapp/posts/{post_id}/unlike`  
-**描述**：取消点赞帖子  
-**说明**：该操作会同时更新帖子作者的likes_count（当被其他用户取消点赞时）  
-**参数**：
-- `post_id` - 路径参数，帖子ID
-- `openid` - 查询参数，用户openid
-
-**响应**：
-
 ```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "success": true,
-    "message": "取消点赞成功",
-    "liked": false,
-    "like_count": 5,
-    "post_id": 1,
-    "action": "unlike"
-  },
-  "details": null,
-  "timestamp": "2023-01-01 12:00:00"
-}
-```
+{"code":200,"message":"success","data":{"success":true,"status":"unfavorited","favorite_count":0,"is_favorited":false},"details":{"message":"取消收藏成功"},"timestamp":"2025-04-12T20:54:22.807428","pagination":null}
+```    
 
-### 2.9 取消收藏帖子
+### 2.8 获取帖子互动状态
 
 **接口**：`POST /api/wxapp/posts/{post_id}/unfavorite`  
 **描述**：取消收藏帖子  
@@ -944,21 +916,9 @@
 **响应**：
 
 ```json
-{
-  "code": 200,
-  "message": "success",
-  "data": {
-    "success": true,
-    "message": "取消收藏成功",
-    "favorite": false,
-    "favorite_count": 2,
-    "post_id": 1,
-    "action": "unfavorite"
-  },
-  "details": null,
-  "timestamp": "2023-01-01 12:00:00"
-}
+{"code":200,"message":"success","data":{"20":{"exist":true,"is_liked":false,"is_favorited":false,"is_author":false,"is_following":false,"like_count":0,"favorite_count":0,"comment_count":0,"view_count":2}},"details":null,"timestamp":"2025-04-12T21:08:44.098526","pagination":null}
 ```
+
 
 ## 三、评论接口
 
@@ -1254,15 +1214,13 @@
         "content": "通知内容",
         "type": "comment",
         "is_read": 0,
-        "sender_openid": "发送者openid",
         "sender": {
-          "id": 2,
           "openid": "发送者openid",
-          "nick_name": "发送者昵称",
-          "avatar": "发送者头像"
+          "avatar": "发送者头像URL",
+          "nickname": "发送者昵称"
         },
-        "related_id": "123",
-        "related_type": "post",
+        "target_id": "123",
+        "target_type": "post",
         "create_time": "2023-01-01 12:00:00",
         "update_time": "2023-01-01 12:00:00",
         "platform": "wxapp",
@@ -1299,9 +1257,13 @@
     "content": "通知内容",
     "type": "comment",
     "is_read": 0,
-    "sender_openid": "发送者openid",
-    "related_id": "123",
-    "related_type": "post",
+    "sender": {
+      "openid": "发送者openid",
+      "avatar": "发送者头像URL",
+      "nickname": "发送者昵称"
+    },
+    "target_id": "123",
+    "target_type": "post",
     "create_time": "2023-01-01 12:00:00",
     "update_time": "2023-01-01 12:00:00",
     "platform": "wxapp",
@@ -1341,9 +1303,13 @@
     "content": "通知内容",
     "type": "comment",
     "is_read": 1,
-    "sender_openid": "发送者openid",
-    "related_id": "123",
-    "related_type": "post",
+    "sender": {
+      "openid": "发送者openid",
+      "avatar": "发送者头像URL",
+      "nickname": "发送者昵称"
+    },
+    "target_id": "123",
+    "target_type": "post",
     "create_time": "2023-01-01 12:00:00",
     "update_time": "2023-01-01 12:30:00",
     "platform": "wxapp",
